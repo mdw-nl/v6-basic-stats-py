@@ -49,7 +49,6 @@ coverage.xml
 tests/
 dev/
 Makefile
-README.md
 
 # Translations
 *.mo
