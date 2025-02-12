@@ -49,6 +49,8 @@ coverage.xml
 tests/
 dev/
 Makefile
+.git
+.gitignore
 
 # Translations
 *.mo
