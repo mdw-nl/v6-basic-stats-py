@@ -5,6 +5,7 @@ on:
     branches: [ "main", "feature/flexible_stats" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   # 1. Setup Infrastructure
