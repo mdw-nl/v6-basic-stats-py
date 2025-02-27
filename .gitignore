@@ -112,6 +112,10 @@ data/
 # Jupyter Notebooks
 *.ipynb
 
+# source-infuser
+.psi-ignore
+report.md
+
 # Temporary!
-tests/
+#tests/
 dev/
