@@ -16,38 +16,23 @@ jobs:
             vantage6_version: 'latest'
           - python_version: '3.12'
             vantage6_version: '4.8.2'
-    runs-on: ubuntu-latest
-    outputs:
-      python_version: ${{ steps.set_output.outputs.python_version }}
-      vantage6_version: ${{ steps.set_output.outputs.vantage6_version }}
-    steps:
-      # (Optional) Checkout the repository if needed by the infra setup workflow
-      - name: Checkout Infra Workflow
-        uses: actions/checkout@v3
-
-      # Call the reusable infrastructure setup workflow from the infra repository.
-      - name: Call Infrastructure Setup Workflow
-        uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-setup-workflow.yml@feature/algorithm-ci #@main
-        with:
-          environment: "CI"
-          python_version: ${{ matrix.config.python_version }}
-          vantage6_version: ${{ matrix.config.vantage6_version }}
-
-      # Set outputs so that subsequent jobs can refer to these matrix values.
-      - name: Set Output Values
-        id: set_output
-        run: |
-          echo "::set-output name=python_version::${{ matrix.config.python_version }}"
-          echo "::set-output name=vantage6_version::${{ matrix.config.vantage6_version }}"
+    uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-setup-workflow.yml@feature/algorithm-ci
+    with:
+      environment: "CI"
+      python_version: ${{ matrix.config.python_version }}
+      vantage6_version: ${{ matrix.config.vantage6_version }}
 
   # 2. Run Infrastructure Tests (if you have any test scripts in an infrastructure_tests directory)
   infra_tests:
     needs: infra_setup
+    strategy:
+      matrix:
+        config:
+          - python_version: '3.11'
+            vantage6_version: 'latest'
+          - python_version: '3.12'
+            vantage6_version: '4.8.2'
     uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-tests-workflow.yml@feature/algorithm-ci
-    with:
-      environment: "CI"
-      python_version: ${{ needs.infra_setup.outputs.python_version }}
-      vantage6_version: ${{ needs.infra_setup.outputs.vantage6_version }}
 
   # 3. Run Algorithm-Specific Python Tests
   algorithm_tests:
@@ -60,7 +45,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ needs.infra_setup.outputs.python_version }}
+          python-version: 3.11
 
       - name: Install Dependencies
         run: pip install -r requirements.txt
@@ -68,22 +53,14 @@ jobs:
       - name: Run Python Tests
         run: python -m unittest discover -s tests
 
-  # 4. Shutdown Infrastructure
+# 4. Shutdown Infrastructure using the reusable workflow from the infra repo
   infra_shutdown:
-    needs: algorithm_tests
+    needs: [infra_setup, infra_tests, algorithm_tests]
     strategy:
       matrix:
         config:
-          - python_version: ${{ needs.infra_setup.outputs.python_version }}
-            vantage6_version: ${{ needs.infra_setup.outputs.vantage6_version }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Infra Workflow
-        uses: actions/checkout@v3
-
-      - name: Call Infrastructure Shutdown Workflow
-        uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-setup-workflow.yml@feature/algorithm-ci
-        with:
-          environment: "CI"
-          python_version: ${{ matrix.config.python_version }}
-          vantage6_version: ${{ matrix.config.vantage6_version }}
+          - python_version: '3.11'
+            vantage6_version: 'latest'
+          - python_version: '3.12'
+            vantage6_version: '4.8.2'
+    uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-shutdown-workflow.yml@feature/algorithm-ci
