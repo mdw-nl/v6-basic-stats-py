@@ -34,6 +34,10 @@ jobs:
           - python_version: '3.12'
             vantage6_version: '4.8.2'
     uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-tests-workflow.yml@feature/algorithm-ci
+    with:
+      environment: "CI"
+      python_version: ${{ matrix.config.python_version }}
+      vantage6_version: ${{ matrix.config.vantage6_version }}
 
   # 3. Run Algorithm-Specific Python Tests
   algorithm_tests:
@@ -65,3 +69,7 @@ jobs:
           - python_version: '3.12'
             vantage6_version: '4.8.2'
     uses: mdw-nl/v6-infrastructure-sh/.github/workflows/infrastructure-shutdown-workflow.yml@feature/algorithm-ci
+    with:
+      environment: "CI"
+      python_version: ${{ matrix.config.python_version }}
+      vantage6_version: ${{ matrix.config.vantage6_version }}
